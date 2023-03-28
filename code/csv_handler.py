@@ -112,6 +112,9 @@ class CSVHandler():
         print(df.shape)
         print(df.index)
         print(df.columns)
+        
+        # save to csv
+        df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
 
         return df
     

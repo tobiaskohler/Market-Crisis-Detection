@@ -14,7 +14,9 @@ def get_data(start: str, end: str, ticker: str, indicators: bool=False, plot: bo
     #calculate daily log returns
     data.columns = [ticker]
     data['log_ret'] = np.log(data[ticker] / data[ticker].shift(1))
-
+    
+    # remove timezone info from index
+    data.index = data.index.tz_localize(None)
     
     if indicators:
         
@@ -42,9 +44,10 @@ def get_data(start: str, end: str, ticker: str, indicators: bool=False, plot: bo
         data['vola20'] = data['log_ret'].rolling(20).std() * np.sqrt(20)
         data['vola10'] = data['log_ret'].rolling(10).std() * np.sqrt(10)
         
-        
+        data = data.dropna()
     
-    data.to_csv(f'{ticker}{start}-{end}.csv')
+    #save data to csv using ; as separator
+    data.to_csv(f'{ticker}_{start}_{end}.csv', sep=';')
     
     if plot:
         
