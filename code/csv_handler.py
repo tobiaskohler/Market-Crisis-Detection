@@ -74,16 +74,40 @@ class CSVHandler():
         return df
 
     
+    
     def get_data_as_panda(self, filepath: str) -> pd.DataFrame:
+        
+        '''
+        One-in-all function that returns a pandas df with all data from the given filepath.
+        '''
         
         df_list = CSVHandler._csv_to_pandas(self, filepath)
         df = CSVHandler._merge_dataframes(self, df_list)
         
-        df = df.dropna(axis=0, how='any')
-        
         print(f'Resulting pd.Dataframe for {filepath}:\n Head:{df.head(3)}\n Tail: {df.tail(3)}\n Shape:{df.shape}\n Index: {df.index}\n Columns: {df.columns}')
         
+        print(df)
         return df
+    
+    def resample_panda(self, daily_df: pd.DataFrame, weekly_df: pd.DataFrame, monthly_df: pd.DataFrame, quarterly_df: pd.DataFrame) -> pd.DataFrame:
+        
+
+        # First, concatenate the dataframes into a single dataframe:
+        
+        
+        df = pd.merge(daily_df, weekly_df , how='outer', left_index=True, right_index=True)
+        df = pd.merge(df, monthly_df , how='outer', left_index=True, right_index=True)
+        
+        # Then, resample the dataframe to daily frequency:
+        df = df.resample('D').asfreq()
+
+        # # Finally, fill any remaining missing values with the last observed value:
+        df = df.fillna(method='ffill')
+        
+        print("All rows:")
+        print(df[-70:-20])
+
+        
     
     def plot_panda(self, df: pd.DataFrame) -> None:
 
@@ -92,11 +116,16 @@ class CSVHandler():
     
         return None
     
-      
+    
+    
 
         
 if __name__ == '__main__':
     
     csvHandler = CSVHandler()
-    df = csvHandler.get_data_as_panda(csvHandler.filepath_weekly)
-    csvHandler.plot_panda(df)
+    daily_df = csvHandler.get_data_as_panda(csvHandler.filepath_daily)
+    weekly_df = csvHandler.get_data_as_panda(csvHandler.filepath_weekly)
+    monthly_df = csvHandler.get_data_as_panda(csvHandler.filepath_monthly)
+    quarterly_df = csvHandler.get_data_as_panda(csvHandler.filepath_quarterly)
+    
+    csvHandler.resample_panda(daily_df, weekly_df, monthly_df, quarterly_df)
