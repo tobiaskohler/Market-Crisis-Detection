@@ -97,28 +97,25 @@ class CSVHandler():
         monthly_df = CSVHandler._get_data_as_panda(self, self.filepath_monthly)
         quarterly_df = CSVHandler._get_data_as_panda(self, self.filepath_quarterly)
         
-
         df = pd.merge(daily_df, weekly_df , how='outer', left_index=True, right_index=True)
         df = pd.merge(df, monthly_df , how='outer', left_index=True, right_index=True)
         df = pd.merge(df, quarterly_df , how='outer', left_index=True, right_index=True)
-        # Then, resample the dataframe to daily frequency:
+
         df = df.resample('D').asfreq()
 
-        # # Finally, fill any remaining missing values with the last observed value:
         df = df.fillna(method='ffill')
-        
-        print("All rows:")
-        print(df[-200:-150])
+        df = df.dropna()
+
+        print("Properties of resampled dataframe:\n")
+        print(df.head(3))
+        print(df.tail(3))
+        print(df.shape)
+        print(df.index)
+        print(df.columns)
 
         return df
     
-    
-    def plot_panda(self, df: pd.DataFrame) -> None:
 
-        df.plot(figsize=(10, 10))
-        plt.show()
-    
-        return None
     
     
     
@@ -129,4 +126,3 @@ if __name__ == '__main__':
     csvHandler = CSVHandler()
 
     df = csvHandler.get_resampled_df()
-    
