@@ -116,11 +116,7 @@ class CSVHandler():
         return df
     
 
-    
-    
-    
 
-        
 if __name__ == '__main__':
     
     csvHandler = CSVHandler()
