@@ -204,7 +204,7 @@ class CSVHandler():
     def csv_to_np(self, filepath: str) -> np.array:
         
         df = pd.read_csv(filepath)
-        features = df.drop(columns=['market_light', 'Date'])
+        features = df.drop(columns=['Date'])
         labels = df['market_light_1']
         
         print(f'Shape of features: {features.shape}')

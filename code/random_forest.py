@@ -13,7 +13,7 @@ log_returns = features.iloc[:, 3].values
 
 # Splitting data into training and testing sets
 
-train_proportion = 0.7
+train_proportion = 0.5
 test_proportion = 1 - train_proportion
 training_period = int(train_proportion*len(log_returns))
 testing_period = int(test_proportion*len(log_returns))
@@ -81,42 +81,43 @@ print("#################")
 
 
 
-# plot the most important features
-feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
-feature_importances.nlargest(20).plot(kind='barh')
-plt.show()
-
-
-
-
-# trainings_score_list = []
-# test_score_list = []
-# iterations = 200
-
-# for i in range(1, iterations):
-#     clf = RandomForestClassifier(n_estimators=i)
-#     clf.fit(data_train, labels_train)
-#     training_score = clf.score(data_train, labels_train)
-#     test_score = clf.score(data_test, labels_test)
-#     trainings_score_list.append(training_score)
-#     test_score_list.append(test_score)
-    
-#     print(f'Accuracy on training set: {training_score}')
-#     print(f'Accuracy on test set: {test_score}')
-    
-# # plot the results
-# plt.plot(range(1, iterations), trainings_score_list, label='Training score')
-# plt.plot(range(1, iterations), test_score_list, label='Test score')
-# plt.xticks(np.arange(1, iterations, 1))
-# plt.xlabel('Number of trees')
-# plt.ylabel('Model score')
-# #mark the best score
-# max_score = max(test_score_list)
-# max_score_index = test_score_list.index(max_score)
-# plt.scatter(max_score_index+1, max_score, c='r', label='Best score')
-
-# plt.legend()
+## FEATURE IMPORTANCE
+# feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+# feature_importances.nlargest(20).plot(kind='barh')
 # plt.show()
 
 
 
+
+# combine training and predictions
+
+predictions = pd.DataFrame(predictions, columns=['predictions'])
+predictions.index = data_test.index
+
+original_with_predictions = pd.concat([features, predictions], axis=1)
+
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+ax1.plot(original_with_predictions['^GSPC'], color='black')
+ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==-1, color='red', alpha=0.5)
+ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==0, color='yellow', alpha=0.5)
+ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==1, color='green', alpha=0.5)
+ax1.set_title('Original data')
+
+ax2.plot(original_with_predictions['^GSPC'], color='black')
+ax2.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['predictions']==-1, color='red', alpha=0.5)
+ax2.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['predictions']==0, color='yellow', alpha=0.5)
+ax2.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['predictions']==1, color='green', alpha=0.5)
+ax2.set_title('Predictions')
+
+# For Area where prediction is different from original, set marker
+for i in range(len(original_with_predictions)-len(predictions), len(original_with_predictions)):
+    if original_with_predictions['predictions'][i] != original_with_predictions['market_light'][i]:
+        ax2.scatter(original_with_predictions.index[i], original_with_predictions['^GSPC'][i], marker='o', color='red')
+    # label the marker with the prediction and the actual value
+        
+
+
+
+ax1.axvline(x=data_train.index[-1], color='black', linestyle='--')
+ax2.axvline(x=data_train.index[-1], color='black', linestyle='--')
+plt.show()
