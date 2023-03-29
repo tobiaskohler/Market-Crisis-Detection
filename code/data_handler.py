@@ -114,21 +114,55 @@ class CSVHandler():
         print(df.columns)
         
         # AUGMENT DATA WITH NEW FEATURES
+        lags = 14
         
-        # add market_light+1 as new feature in each row
-        df['market_light_1'] = df['market_light'].shift(-1)
-        df = df.iloc[1:]
-        print(df.shape)
-        print(df.head(3))
+        # DATE-RELATED FEATURES
+        # calculate day of week
+        df['day_of_week'] = df.index.dayofweek
         
-        # add lagged features for all columns up to 7 days
-        for i in range(1, 8):
+        # calculate month
+        df['month'] = df.index.month
+        
+        # calculate is month end
+        df['is_month_end'] = df.index.is_month_end
+        
+        # calculate is month start
+        df['is_month_start'] = df.index.is_month_start
+        
+        # calculate is quarter end
+        df['is_quarter_end'] = df.index.is_quarter_end
+
+        # calculate is quarter start
+        df['is_quarter_start'] = df.index.is_quarter_start
+        
+        
+        # LAGGED VARIABLES
+        for i in range(1,lags+1):
             df[f'T10Y2Y_{i}'] = df['T10Y2Y'].shift(i)
 
-        for i in range(1, 8):
+        for i in range(1,lags+1):
             df[f'T10Y3M_{i}'] = df['T10Y2Y'].shift(i)
 
-  
+        for i in range(1,lags+1):
+            df[f'market_light_{i}'] = df['market_light'].shift(i)
+            
+        for i in range(1,lags+1):
+            df[f'OFR FSI_{i}'] = df['OFR FSI'].shift(i)
+            
+        for i in range(1,lags+1):
+            df[f'Bullish_{i}'] = df['Bullish'].shift(i)
+            df[f'Neutral_{i}'] = df['Neutral'].shift(i)
+            df[f'Bearish_{i}'] = df['Bearish'].shift(i)
+            
+        # ROLLING WINDOWS, WEIGHTED AVERAGE, MAX, MIN and STD-DEV
+        
+        window_size = 30
+        
+        
+
+        #print if na
+        print(df.isna().sum())
+        df = df.dropna()
         
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
