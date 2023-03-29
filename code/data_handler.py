@@ -113,7 +113,7 @@ class CSVHandler():
         print(df.shape)
         print(df.index)
         print(df.columns)
-        
+                
         # AUGMENT DATA WITH NEW FEATURES
         lags = 14
         
@@ -148,8 +148,48 @@ class CSVHandler():
         
         window_size = 30
         
+        # T10Y2Y
         
-
+        #calculate weighted moving average
+        df['T10Y2Y_rolling_mean'] = df['T10Y2Y'].rolling(window=window_size).mean()
+        df['T10Y2Y_rolling_max'] = df['T10Y2Y'].rolling(window=window_size).max()
+        df['T10Y2Y_rolling_min'] = df['T10Y2Y'].rolling(window=window_size).min()
+        df['T10Y2Y_rolling_std'] = df['T10Y2Y'].rolling(window=window_size).std()
+        
+        # T10Y3M
+        df['T10Y3M_rolling_mean'] = df['T10Y3M'].rolling(window=window_size).mean()
+        df['T10Y3M_rolling_max'] = df['T10Y3M'].rolling(window=window_size).max()
+        df['T10Y3M_rolling_min'] = df['T10Y3M'].rolling(window=window_size).min()
+        df['T10Y3M_rolling_std'] = df['T10Y3M'].rolling(window=window_size).std()
+        
+        # OFR FSI
+        df['OFR FSI_rolling_mean'] = df['OFR FSI'].rolling(window=window_size).mean()
+        df['OFR FSI_rolling_max'] = df['OFR FSI'].rolling(window=window_size).max()
+        df['OFR FSI_rolling_min'] = df['OFR FSI'].rolling(window=window_size).min()
+        df['OFR FSI_rolling_std'] = df['OFR FSI'].rolling(window=window_size).std()
+        
+        # Bullish   
+        
+        df['Bullish_rolling_mean'] = df['Bullish'].rolling(window=window_size).mean()
+        df['Bullish_rolling_max'] = df['Bullish'].rolling(window=window_size).max()
+        df['Bullish_rolling_min'] = df['Bullish'].rolling(window=window_size).min()
+        df['Bullish_rolling_std'] = df['Bullish'].rolling(window=window_size).std()
+        
+        # Neutral
+        
+        df['Neutral_rolling_mean'] = df['Neutral'].rolling(window=window_size).mean()
+        df['Neutral_rolling_max'] = df['Neutral'].rolling(window=window_size).max()
+        df['Neutral_rolling_min'] = df['Neutral'].rolling(window=window_size).min()
+        df['Neutral_rolling_std'] = df['Neutral'].rolling(window=window_size).std()
+        
+        # Bearish
+        
+        df['Bearish_rolling_mean'] = df['Bearish'].rolling(window=window_size).mean()
+        df['Bearish_rolling_max'] = df['Bearish'].rolling(window=window_size).max()
+        df['Bearish_rolling_min'] = df['Bearish'].rolling(window=window_size).min()
+        df['Bearish_rolling_std'] = df['Bearish'].rolling(window=window_size).std()
+        
+            
         #print if na
         print(df.isna().sum())
         df = df.dropna()

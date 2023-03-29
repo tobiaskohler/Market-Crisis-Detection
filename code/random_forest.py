@@ -6,6 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from utils import *
 
 features, labels = CSVHandler.csv_to_np(CSVHandler, filepath='../prepared_data/resampled.csv')
 log_returns = features.iloc[:, 3].values
@@ -48,32 +49,42 @@ print(classification_report)
 
 print("### CONFUSION MATRIX ###")
 confusion_matrix = multilabel_confusion_matrix(labels_test, predictions, labels=[-1, 0, 1])
-print(confusion_matrix)
+
+for i in range(len(confusion_matrix)):
+    if i == 0:
+        cprint(f"### label -1 / RED ###", 'red') 
+        true_negative = confusion_matrix[i][0][0]
+        false_negative = confusion_matrix[i][1][0]
+        true_positive = confusion_matrix[i][1][1]
+        false_positive = confusion_matrix[i][0][1]
+        cprint(f'True negative: {true_negative}\nFalse negative: {false_negative}\nTrue positive: {true_positive}\nFalse positive: {false_positive}', 'red')
+        
+           
+    elif i == 1:
+        cprint(f"### label 0 / YELLOW ###", 'yellow')
+        true_negative = confusion_matrix[i][0][0]
+        false_negative = confusion_matrix[i][1][0]
+        true_positive = confusion_matrix[i][1][1]
+        false_positive = confusion_matrix[i][0][1]
+        cprint(f'True negative: {true_negative}\nFalse negative: {false_negative}\nTrue positive: {true_positive}\nFalse positive: {false_positive}', 'yellow')
+
+    elif i == 2:
+        cprint("### label 1 / GREEN ###", 'green')
+        true_negative = confusion_matrix[i][0][0]
+        false_negative = confusion_matrix[i][1][0]
+        true_positive = confusion_matrix[i][1][1]
+        false_positive = confusion_matrix[i][0][1]
+        cprint(f'True negative: {true_negative}\nFalse negative: {false_negative}\nTrue positive: {true_positive}\nFalse positive: {false_positive}', 'green')
 
 
 print("#################")
 
 
 
-
-
-
-
-
-# # print most important features
-# feature_importances = pd.DataFrame(clf.feature_importances_,
-#                                       index = features.columns,
-#                                         columns=['importance']).sort_values('importance', ascending=False)
-# print(feature_importances)
-
-# #plot feature importance, make it horizontal
-# sns.barplot(x=feature_importances['importance'], y=feature_importances.index)
-
-# #rotate x labels
-# plt.xticks(rotation=45)
-# plt.show()
-
-
+# plot the most important features
+feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+feature_importances.nlargest(20).plot(kind='barh')
+plt.show()
 
 
 
