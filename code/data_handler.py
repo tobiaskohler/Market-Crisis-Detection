@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class CSVHandler():
     
     def __init__(self) -> None:
@@ -117,22 +118,11 @@ class CSVHandler():
         lags = 14
         
         # DATE-RELATED FEATURES
-        # calculate day of week
         df['day_of_week'] = df.index.dayofweek
-        
-        # calculate month
         df['month'] = df.index.month
-        
-        # calculate is month end
         df['is_month_end'] = df.index.is_month_end
-        
-        # calculate is month start
         df['is_month_start'] = df.index.is_month_start
-        
-        # calculate is quarter end
         df['is_quarter_end'] = df.index.is_quarter_end
-
-        # calculate is quarter start
         df['is_quarter_start'] = df.index.is_quarter_start
         
         
