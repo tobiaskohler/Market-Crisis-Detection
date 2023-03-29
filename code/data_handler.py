@@ -113,10 +113,26 @@ class CSVHandler():
         print(df.index)
         print(df.columns)
         
+        # AUGMENT DATA WITH NEW FEATURES
+        
+        
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
 
         return df
+    
+    
+
+    def csv_to_np(self, filepath: str) -> np.array:
+        
+        df = pd.read_csv(filepath)
+        features = df.drop(columns=['market_light', 'Date'])
+        labels = df['market_light']
+        
+        print(f'Shape of features: {features.shape}')
+        print(f'Shape of labels: {labels.shape}')
+        
+        return features, labels
     
 
 
@@ -124,4 +140,7 @@ if __name__ == '__main__':
     
     csvHandler = CSVHandler()
 
-    df = csvHandler.get_resampled_df()
+    # df = csvHandler.get_resampled_df()
+
+    f = '../prepared_data/resampled.csv'
+    features, labels = csvHandler.csv_to_np(f)
