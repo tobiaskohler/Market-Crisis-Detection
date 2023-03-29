@@ -115,6 +115,20 @@ class CSVHandler():
         
         # AUGMENT DATA WITH NEW FEATURES
         
+        # add market_light+1 as new feature in each row
+        df['market_light_1'] = df['market_light'].shift(-1)
+        df = df.iloc[1:]
+        print(df.shape)
+        print(df.head(3))
+        
+        # add lagged features for all columns up to 7 days
+        for i in range(1, 8):
+            df[f'T10Y2Y_{i}'] = df['T10Y2Y'].shift(i)
+
+        for i in range(1, 8):
+            df[f'T10Y3M_{i}'] = df['T10Y2Y'].shift(i)
+
+  
         
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
@@ -127,7 +141,7 @@ class CSVHandler():
         
         df = pd.read_csv(filepath)
         features = df.drop(columns=['market_light', 'Date'])
-        labels = df['market_light']
+        labels = df['market_light_1']
         
         print(f'Shape of features: {features.shape}')
         print(f'Shape of labels: {labels.shape}')
@@ -140,7 +154,7 @@ if __name__ == '__main__':
     
     csvHandler = CSVHandler()
 
-    # df = csvHandler.get_resampled_df()
+    df = csvHandler.get_resampled_df()
 
     f = '../prepared_data/resampled.csv'
     features, labels = csvHandler.csv_to_np(f)
