@@ -81,10 +81,10 @@ print("#################")
 
 
 
-## FEATURE IMPORTANCE
-# feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
-# feature_importances.nlargest(20).plot(kind='barh')
-# plt.show()
+# FEATURE IMPORTANCE
+feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+feature_importances.nlargest(20).plot(kind='barh')
+plt.show()
 
 
 

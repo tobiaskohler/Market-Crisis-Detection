@@ -117,6 +117,20 @@ class CSVHandler():
         # AUGMENT DATA WITH NEW FEATURES
         lags = 14
         
+        # CALCULATE DIFFERENCES
+        
+        df['diff_T10Y2Y'] = round(df['T10Y2Y'].pct_change(),8)
+        df['diff_T10Y3M'] = df['T10Y3M'].pct_change()
+        df['diff_OFR FSI'] = df['OFR FSI'].pct_change()
+        df['diff_GDP'] = df['GDP'].pct_change()
+        df['diff_EUGDP'] = df['EUGDP'].pct_change()
+        df['diff_Bullish'] = df['Bullish'].pct_change()
+        df['diff_Bearish'] = df['Bearish'].pct_change()
+        df['diff_Neutral'] = df['Neutral'].pct_change()
+        df['diff_UMCSENT'] = df['UMCSENT'].pct_change()
+        df['diff_BCI'] = df['BCI'].pct_change()
+        df['diff_UNRATE'] = df['UNRATE'].pct_change()
+        
         # DATE-RELATED FEATURES
         df['day_of_week'] = df.index.dayofweek
         df['month'] = df.index.month
@@ -192,11 +206,12 @@ class CSVHandler():
             
         #print if na
         print(df.isna().sum())
-        df = df.dropna()
+        df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        df.dropna(inplace=True)
         
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
-
+        print(f'Saved to {os.path.join(self.parent_dir, "prepared_data", "resampled.csv")}')
         return df
     
     
