@@ -207,7 +207,7 @@ class CSVHandler():
         #print if na
         print(df.isna().sum())
         df.replace([np.inf, -np.inf], np.nan, inplace=True)
-        #df.dropna(inplace=True)
+        df.dropna(inplace=True)
         
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
@@ -219,15 +219,19 @@ class CSVHandler():
     def csv_to_np(self, filepath: str) -> np.array:
         
         df = pd.read_csv(filepath)
+        
         features = df.drop(columns=['Date'])
+        features = features[:-1] # remove last row, since now prediction is available
+        
         labels = df['market_light'].shift(-1) # Market Light of tomorrow
+        labels = labels[:-1] # remove last row, since now prediction is available
         
         print(f'Shape of features: {features.shape}')
         print(f'Shape of labels: {labels.shape}')
         
-        # save features and labels to csv files
-        features.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'features.csv'))
-        labels.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'labels.csv'))
+        # # save features and labels to csv files
+        # features.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'features.csv'))
+        # labels.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'labels.csv'))
         
         return features, labels
     

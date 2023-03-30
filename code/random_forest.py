@@ -8,6 +8,9 @@ import pandas as pd
 import numpy as np
 from utils import *
 
+#make background grey
+sns.set_style('darkgrid')
+
 features, labels = CSVHandler.csv_to_np(CSVHandler, filepath='../prepared_data/resampled.csv')
 log_returns = features.iloc[:, 3].values
 
@@ -82,9 +85,9 @@ print("#################")
 
 
 # FEATURE IMPORTANCE
-feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
-feature_importances.nlargest(20).plot(kind='barh')
-plt.show()
+# feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+# feature_importances.nlargest(20).plot(kind='barh')
+# plt.show()
 
 
 
@@ -95,8 +98,9 @@ predictions = pd.DataFrame(predictions, columns=['predictions'])
 predictions.index = data_test.index
 
 original_with_predictions = pd.concat([features, predictions], axis=1)
+plt.style.use='dark-background'
 
-fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
 ax1.plot(original_with_predictions['^GSPC'], color='black')
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==-1, color='red', alpha=0.5)
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==0, color='yellow', alpha=0.5)
@@ -109,12 +113,32 @@ ax2.fill_between(original_with_predictions.index, original_with_predictions['^GS
 ax2.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['predictions']==1, color='green', alpha=0.5)
 ax2.set_title('Predictions')
 
-# For Area where prediction is different from original, set marker
 for i in range(len(original_with_predictions)-len(predictions), len(original_with_predictions)):
     if original_with_predictions['predictions'][i] != original_with_predictions['market_light'][i]:
         ax2.scatter(original_with_predictions.index[i], original_with_predictions['^GSPC'][i], marker='o', color='red')
-    # label the marker with the prediction and the actual value
         
+original_with_predictions['difference'] = original_with_predictions['predictions'] - original_with_predictions['market_light']
+
+s = 15
+alpha = .5
+for i in range(len(original_with_predictions)-len(predictions), len(original_with_predictions)):
+
+    if original_with_predictions['difference'][i] != 0:
+        
+        if original_with_predictions['predictions'][i] == 1:
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['market_light'][i], marker='o', color='black', s=s)
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['predictions'][i], marker='^', color='blue', s=s,)
+            
+        elif original_with_predictions['predictions'][i] == -1:
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['market_light'][i], marker='o', color='black', s=s)
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['predictions'][i], marker='^', color='blue', s=s)
+            
+        elif original_with_predictions['predictions'][i] == 0:
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['market_light'][i], marker='o', color='black', s=s,)
+            ax3.scatter(original_with_predictions.index[i], original_with_predictions['predictions'][i], marker='^', color='blue', s=s)
+        
+    ax3.legend(['Original', 'Predictions'], loc='lower left')
+    
 
 
 
