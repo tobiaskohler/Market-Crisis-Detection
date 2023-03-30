@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from utils import *
+import time
 
 #make background grey
 sns.set_style('darkgrid')
@@ -156,14 +157,7 @@ original_with_predictions['log_ret_bah'] = 0.0  # create a new column with initi
 for i in range(len(original_with_predictions)):
     
     if not pd.isna(original_with_predictions['difference'][i]):
-        if original_with_predictions['market_light'][i] == 1:
-            original_with_predictions['log_ret_bah'][i] = original_with_predictions['log_ret'][i]
-
-        elif original_with_predictions['market_light'][i] == 0:
-            original_with_predictions['log_ret_bah'][i] = 0.6 * original_with_predictions['log_ret'][i]
-            
-        elif original_with_predictions['market_light'][i] == -1:
-            original_with_predictions['log_ret_bah'][i] = 0.0
+        original_with_predictions['log_ret_bah'][i] = original_with_predictions['log_ret'][i]
             
     else:
         original_with_predictions['log_ret_bah'][i] = 0.0
@@ -193,22 +187,16 @@ for i in range(len(original_with_predictions)):
 
 
 
-# plot cumulative log_ret but only for the test set
-
-
-
-
-
-
-
-
-
 
 ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
 ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
 ax4.legend(['BAH', 'Adaptive strategy'], loc='upper left')
 ax4.set_ylabel('Cumulative return')
 ax4.set_title('Perf. of BAH vs. adaptive strategy')
+#save picture
+#timestamp
+fig.set_size_inches(17.5, 9.5)
+plt.savefig(f'../predictions/BAH_vs_adaptive{time.time()}.png')
 plt.show()
 
 
