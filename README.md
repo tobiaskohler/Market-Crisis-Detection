@@ -32,6 +32,13 @@ The output of the algorithm is similiar to a traffic light and can be used in po
 - EU GDP (https://fred.stlouisfed.org/series/CPMNACSCAB1GQEU272020)
 - "Buffet Indicator": ratio of United States stock market (represented by Wilshire 5000) to GDP 
 
+
+### Engineered Features
+- Date-Related Features (Day of week/Month/Quarter/)
+- Lags of daily indicators
+- Rolling Weighted average, Max, Min and StdDev of each Faily Feature
+- 
+
 ## Implementation
 
 1. Data cleansing

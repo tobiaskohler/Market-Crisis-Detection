@@ -1,7 +1,8 @@
 from data_handler import CSVHandler
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, multilabel_confusion_matrix
+from sklearn.metrics import classification_report, multilabel_confusion_matrix, accuracy_score
+from sklearn.model_selection import KFold
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -36,7 +37,7 @@ labels_test.to_csv('../prepared_data/labels_test.csv')
 print(f'Shape of training data: {data_train.shape}\nShape of testing data: {data_test.shape}\nShape of training labels: {labels_train.shape}\nShape of testing labels: {labels_test.shape}')
 
 # Creating a random forest classifier
-clf = RandomForestClassifier(n_estimators=10, n_jobs=-1) #using all cores
+clf = RandomForestClassifier(n_estimators=100, n_jobs=-1) #using all cores
 clf.fit(data_train, labels_train)
 
 training_score = clf.score(data_train, labels_train)
@@ -86,9 +87,9 @@ print("#################")
 
 
 # FEATURE IMPORTANCE
-# feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
-# feature_importances.nlargest(20).plot(kind='barh')
-# plt.show()
+feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+feature_importances.nlargest(20).plot(kind='barh')
+plt.show()
 
 
 
