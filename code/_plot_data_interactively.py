@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 # import 00-SP500.csv as pandas df
 df = pd.read_csv('../prepared_data/daily/00-SP500.csv', delimiter=';')
@@ -76,6 +76,27 @@ data['market_light'].loc['2002-11-30':'2003-03-13'] = -1
 data['market_light'].loc['2002-10-17':'2002-11-29'] = 0
 
 
+# calculate rolling drawdown on a period of 30 days
+# initialize rolling_max with value of first observation
+data['rolling_max'] = data['cum_returns'].rolling(window=90, min_periods=1).max()
+data['drawdown'] = data['cum_returns']/data['rolling_max'] - 1.0
+
+# calculate volatility of drawdown (standard deviation)
+#data['drawdown_stddev'] = data['drawdown'].rolling(window=7, min_periods=1).std() # seemed to be ok but maybe to much noise
+
+# calculate max drawdown in a period of 30 days
+data['drawdown_max'] = data['drawdown'].rolling(window=30, min_periods=1).min()
+# calculate volatility of max drawdown (standard deviation)
+data['drawdown_min'] = data['drawdown'].rolling(window=30, min_periods=1).max()
+data['drawdown_spread'] = data['drawdown_max'] - data['drawdown_min']
+
+#calculate 7 day moving average and 21 day moving average of drawdown_spread
+data['drawdown_spread_1'] = data['drawdown_spread'].rolling(window=30, min_periods=1).mean()
+data['drawdown_spread_2'] = data['drawdown_spread'].rolling(window=7, min_periods=1).mean()
+
+#calculate max drawdown spread in a period of 30 days
+data['drawdown_spread_max'] = data['drawdown_spread'].rolling(window=30, min_periods=1).max()
+
 
 # save market_light to csv
 data['market_light'].to_csv('../prepared_data/99-LABELS.csv', header=True, sep=";")
@@ -86,4 +107,11 @@ ax.plot(data['^GSPC'], color='black')
 ax.fill_between(data.index, data['^GSPC'], where=data['market_light']==-1, color='red', alpha=0.5)
 ax.fill_between(data.index, data['^GSPC'], where=data['market_light']==0, color='yellow', alpha=0.5)
 ax.fill_between(data.index, data['^GSPC'], where=data['market_light']==1, color='green', alpha=0.5)
+#plot drawdown on second y-axis
+ax2 = ax.twinx()
+# ax2.plot(data['drawdown_max'], color='black', alpha=0.5)
+# ax2.plot(data['drawdown_min'], color='blue', alpha=0.5)
+# plot drawdown_augmented_market_light only for values == -1
+ax2.fill_between(data.index, data['^GSPC'], where=data['drawdown_augmented_market_light']==-1, color='blue', alpha=0.5)
+
 plt.show()

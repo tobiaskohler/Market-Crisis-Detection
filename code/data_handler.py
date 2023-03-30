@@ -147,9 +147,6 @@ class CSVHandler():
         for i in range(1,lags+1):
             df[f'T10Y3M_{i}'] = df['T10Y2Y'].shift(i)
 
-        '''
-        We dont know market_light. So we will not use it. Only for training????? How to do?? WIR MÜSSE NNOCH MARKET_LIGHT RAUSNEHMEN!!!!!! 
-        '''
         
         for i in range(80,80+lags):
             df[f'market_light_{i}'] = df['market_light'].shift(i)
