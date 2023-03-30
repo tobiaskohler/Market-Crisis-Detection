@@ -221,10 +221,10 @@ class CSVHandler():
         df = pd.read_csv(filepath)
         
         features = df.drop(columns=['Date'])
-        features = features[:-1] # remove last row, since now prediction is available
+        features = features[:-2] # remove last two rows, since no prediction is available
         
-        labels = df['market_light'].shift(-1) # Market Light of tomorrow
-        labels = labels[:-1] # remove last row, since now prediction is available
+        labels = df['market_light'].shift(-2) # Market Light of the day after tomorrow
+        labels = labels[:-2] # remove last two rows, since no prediction is available
         
         print(f'Shape of features: {features.shape}')
         print(f'Shape of labels: {labels.shape}')

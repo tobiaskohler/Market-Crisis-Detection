@@ -100,7 +100,9 @@ predictions.index = data_test.index
 original_with_predictions = pd.concat([features, predictions], axis=1)
 plt.style.use='dark-background'
 
-fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
+
+
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharex=True)
 ax1.plot(original_with_predictions['^GSPC'], color='black')
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==-1, color='red', alpha=0.5)
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==0, color='yellow', alpha=0.5)
@@ -144,4 +146,71 @@ for i in range(len(original_with_predictions)-len(predictions), len(original_wit
 
 ax1.axvline(x=data_train.index[-1], color='black', linestyle='--')
 ax2.axvline(x=data_train.index[-1], color='black', linestyle='--')
+
+
+
+# Calculate Performance of BAH vs Predictions
+original_with_predictions['log_ret_adaptive'] = 0.0  # create a new column with initial values of 0.0
+original_with_predictions['log_ret_bah'] = 0.0  # create a new column with initial values of 0.0
+
+for i in range(len(original_with_predictions)):
+    
+    if not pd.isna(original_with_predictions['difference'][i]):
+        if original_with_predictions['market_light'][i] == 1:
+            original_with_predictions['log_ret_bah'][i] = original_with_predictions['log_ret'][i]
+
+        elif original_with_predictions['market_light'][i] == 0:
+            original_with_predictions['log_ret_bah'][i] = 0.6 * original_with_predictions['log_ret'][i]
+            
+        elif original_with_predictions['market_light'][i] == -1:
+            original_with_predictions['log_ret_bah'][i] = 0.0
+            
+    else:
+        original_with_predictions['log_ret_bah'][i] = 0.0
+            
+    
+    if original_with_predictions['difference'][i] == 0:
+        if original_with_predictions['market_light'][i] == 1:
+            original_with_predictions['log_ret_adaptive'][i] = original_with_predictions['log_ret'][i]
+
+        elif original_with_predictions['market_light'][i] == 0:
+            original_with_predictions['log_ret_adaptive'][i] = 0.6 * original_with_predictions['log_ret'][i]
+
+        elif original_with_predictions['market_light'][i] == -1:
+            original_with_predictions['log_ret_adaptive'][i] = 0.0
+
+
+    
+    else:
+        if original_with_predictions['predictions'][i] == 1:
+            original_with_predictions['log_ret_adaptive'][i] = original_with_predictions['log_ret'][i]
+
+        elif original_with_predictions['predictions'][i] == 0:
+            original_with_predictions['log_ret_adaptive'][i] = 0.6 * original_with_predictions['log_ret'][i]
+
+        elif original_with_predictions['predictions'][i] == -1:
+            original_with_predictions['log_ret_adaptive'][i] = 0.0
+
+
+
+# plot cumulative log_ret but only for the test set
+
+
+
+
+
+
+
+
+
+
+ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
+ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
+ax4.legend(['BAH', 'Adaptive strategy'], loc='upper left')
+ax4.set_ylabel('Cumulative return')
+ax4.set_title('Perf. of BAH vs. adaptive strategy')
 plt.show()
+
+
+#save original with predictions to csv
+original_with_predictions.to_csv('../predictions/original_with_predictions.csv')
