@@ -119,7 +119,7 @@ class CSVHandler():
         
         # CALCULATE DIFFERENCES
         
-        df['diff_T10Y2Y'] = round(df['T10Y2Y'].pct_change(),8)
+        df['diff_T10Y2Y'] = df['T10Y2Y'].pct_change()
         df['diff_T10Y3M'] = df['T10Y3M'].pct_change()
         df['diff_OFR FSI'] = df['OFR FSI'].pct_change()
         df['diff_GDP'] = df['GDP'].pct_change()
@@ -207,7 +207,7 @@ class CSVHandler():
         #print if na
         print(df.isna().sum())
         df.replace([np.inf, -np.inf], np.nan, inplace=True)
-        df.dropna(inplace=True)
+        #df.dropna(inplace=True)
         
         # save to csv
         df.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'resampled.csv'))
@@ -220,10 +220,14 @@ class CSVHandler():
         
         df = pd.read_csv(filepath)
         features = df.drop(columns=['Date'])
-        labels = df['market_light_1']
+        labels = df['market_light'].shift(-1) # Market Light of tomorrow
         
         print(f'Shape of features: {features.shape}')
         print(f'Shape of labels: {labels.shape}')
+        
+        # save features and labels to csv files
+        features.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'features.csv'))
+        labels.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'labels.csv'))
         
         return features, labels
     
