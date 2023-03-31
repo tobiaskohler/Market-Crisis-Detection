@@ -147,8 +147,7 @@ class CSVHandler():
         for i in range(1,lags+1):
             df[f'T10Y3M_{i}'] = df['T10Y2Y'].shift(i)
 
-        
-        for i in range(80,80+lags):
+        for i in range(1,lags+1):
             df[f'market_light_{i}'] = df['market_light'].shift(i)
             
         for i in range(1,lags+1):

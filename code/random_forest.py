@@ -18,7 +18,7 @@ log_returns = features.iloc[:, 3].values
 
 # Splitting data into training and testing sets
 
-train_proportion = 0.5
+train_proportion = 0.7
 test_proportion = 1 - train_proportion
 training_period = int(train_proportion*len(log_returns))
 testing_period = int(test_proportion*len(log_returns))
@@ -104,7 +104,7 @@ plt.style.use='dark-background'
 
 
 
-fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharex=True)
+fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, sharex=True)
 ax1.plot(original_with_predictions['^GSPC'], color='black')
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==-1, color='red', alpha=0.5)
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==0, color='yellow', alpha=0.5)
@@ -193,13 +193,51 @@ ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
 ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
 ax4.legend(['BAH', 'Adaptive strategy'], loc='upper left')
 ax4.set_ylabel('Cumulative return')
-ax4.set_title('Perf. of BAH vs. adaptive strategy')
+ax4.set_title('PERFORMANCE')
 #save picture
 #timestamp
 fig.set_size_inches(17.5, 9.5)
-plt.savefig(f'../predictions/BAH_vs_adaptive{time.time()}.png')
+
+
+
+#calculate annualized sharpe ratio
+sharpe_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'].std())
+sharpe_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'].std())
+
+# add sharpe ratio to plot
+ax4.text(0.5, 0.5, f'Sharpe ratio BAH: {sharpe_ratio_bah:.6f}', transform=ax4.transAxes)
+ax4.text(0.5, 0.4, f'Sharpe ratio adaptive: {sharpe_ratio_adaptive:.6f}', transform=ax4.transAxes)
+
+
+
+
+# calculate drawdown of BAH vs. adaptive strategy
+original_with_predictions['cum_ret_bah'] = original_with_predictions['log_ret_bah'].cumsum()
+original_with_predictions['cum_ret_adaptive'] = original_with_predictions['log_ret_adaptive'].cumsum()
+
+original_with_predictions['cum_max_bah'] = original_with_predictions['cum_ret_bah'].cummax()
+original_with_predictions['drawdown_bah'] = original_with_predictions['cum_max_bah'] - original_with_predictions['cum_ret_bah']
+
+original_with_predictions['cum_max_adaptive'] = original_with_predictions['cum_ret_adaptive'].cummax()
+original_with_predictions['drawdown_adaptive'] = original_with_predictions['cum_max_adaptive'] - original_with_predictions['cum_ret_adaptive']
+
+ax5.plot(original_with_predictions['drawdown_bah'], color='blue')
+ax5.plot(original_with_predictions['drawdown_adaptive'], color='red')
+ax5.legend(['BAH', 'Adaptive strategy'], loc='upper left')
+ax5.set_ylabel('Drawdown')
+ax5.set_title('DRAWDOWN')
+
+#calculate sortino ratio
+sortino_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'][original_with_predictions['log_ret_bah'] < 0].std())
+sortino_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'][original_with_predictions['log_ret_adaptive'] < 0].std())
+
+# add sortino ratio to plot
+ax5.text(0.5, 0.5, f'Sortino ratio BAH: {sortino_ratio_bah:.6f}', transform=ax5.transAxes)
+ax5.text(0.5, 0.4, f'Sortino ratio adaptive: {sortino_ratio_adaptive:.6f}', transform=ax5.transAxes)
+
 plt.show()
 
 
 #save original with predictions to csv
 original_with_predictions.to_csv('../predictions/original_with_predictions.csv')
+plt.savefig(f'../predictions/BAH_vs_adaptive{time.time()}.png')
