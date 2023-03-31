@@ -86,10 +86,10 @@ print("#################")
 
 
 
-# FEATURE IMPORTANCE
-feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
-feature_importances.nlargest(20).plot(kind='barh')
-plt.show()
+## FEATURE IMPORTANCE
+# feature_importances = pd.Series(clf.feature_importances_, index=features.columns)
+# feature_importances.nlargest(20).plot(kind='barh')
+# plt.show()
 
 
 
@@ -110,6 +110,16 @@ ax1.fill_between(original_with_predictions.index, original_with_predictions['^GS
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==0, color='yellow', alpha=0.5)
 ax1.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['market_light']==1, color='green', alpha=0.5)
 ax1.set_title('Original data')
+
+#add sma30 and sma200 to plot
+original_with_predictions['sma_30'] = original_with_predictions['^GSPC'].rolling(window=30).mean()
+original_with_predictions['sma_200'] = original_with_predictions['^GSPC'].rolling(window=200).mean()
+
+
+#plot sma 30 and 200 on ax1 and make line thicker
+ax1.plot(original_with_predictions['sma_30'], color='blue', linewidth=2)
+ax1.plot(original_with_predictions['sma_200'], color='purple', linewidth=2)
+
 
 ax2.plot(original_with_predictions['^GSPC'], color='black')
 ax2.fill_between(original_with_predictions.index, original_with_predictions['^GSPC'], where=original_with_predictions['predictions']==-1, color='red', alpha=0.5)
@@ -188,15 +198,30 @@ for i in range(len(original_with_predictions)):
 
 
 
+#Compare to simple moving average strategy, if 30 day is below 200 day, no position, else long
+original_with_predictions['sma_30_200'] = 0.0
+original_with_predictions['log_ret_sma'] = 0.0
 
+for i in range(len(original_with_predictions)):
+    if not pd.isna(original_with_predictions['difference'][i]):
+
+        if original_with_predictions['sma_30'][i] < original_with_predictions['sma_200'][i]:
+            original_with_predictions['sma_30_200'][i] = 0.0
+        else:
+            original_with_predictions['sma_30_200'][i] = 1.0
+
+        original_with_predictions['log_ret_sma'][i] = original_with_predictions['sma_30_200'][i] * original_with_predictions['log_ret'][i]
+        
+    else:
+        original_with_predictions['log_ret_sma'][i] = 0.0
+    
 ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
 ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
-ax4.legend(['BAH', 'Adaptive strategy'], loc='upper left')
+ax4.plot(original_with_predictions['log_ret_sma'].cumsum(), color='green')
+
+ax4.legend(['BAH', 'Adaptive strategy', 'SMA(30/200 long only)'], loc='upper left')
 ax4.set_ylabel('Cumulative return')
 ax4.set_title('PERFORMANCE')
-#save picture
-#timestamp
-fig.set_size_inches(17.5, 9.5)
 
 
 
@@ -235,6 +260,9 @@ sortino_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adap
 ax5.text(0.5, 0.5, f'Sortino ratio BAH: {sortino_ratio_bah:.6f}', transform=ax5.transAxes)
 ax5.text(0.5, 0.4, f'Sortino ratio adaptive: {sortino_ratio_adaptive:.6f}', transform=ax5.transAxes)
 
+
+
+fig.set_size_inches(17.5, 9.5)
 plt.show()
 
 
