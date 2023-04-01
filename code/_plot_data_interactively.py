@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import medfilt
 
-# import 00-SP500.csv as pandas df
 df = pd.read_csv('../prepared_data/daily/00-SP500.csv', delimiter=';')
 df.set_index('Date', inplace=True)
 
@@ -11,10 +10,7 @@ df['returns'] = df['^GSPC'].pct_change()
 df['cum_returns'] = (1 + df['returns']).cumprod()
 
 data = df[['^GSPC', 'cum_returns']]
-# print(data.tail(10))
 
-# calculate rolling drawdown, period 30 days
-# initialize rolling_max with value of first observation
 data['rolling_max'] = data['cum_returns'].rolling(window=200, min_periods=1).max()
 data['drawdown'] = data['cum_returns']/data['rolling_max'] - 1.0
 
@@ -22,11 +18,6 @@ data['drawdown'] = data['cum_returns']/data['rolling_max'] - 1.0
 drawdown_threshold_green = 0.0
 drawdown_threshold_yellow = -0.01
 drawdown_threshold_red = -0.05
-
-#create new column with market light
-# if drawdown is above drawdown_threshold_green, market light is green
-# if drawdown is below drawdown_threshold_red, market light is red
-# if drawdown is between drawdown_threshold_green and drawdown_threshold_yellow, market light is yellow
 
 data['market_light'] =  data['drawdown'].apply(lambda x: 1 if x > drawdown_threshold_yellow else 0 if x > drawdown_threshold_red else -1)
 
@@ -71,8 +62,6 @@ data['market_light'] =  data['drawdown'].apply(lambda x: 1 if x > drawdown_thres
 
 # data['market_light'].loc['2002-11-30':'2003-03-13'] = -1
 # data['market_light'].loc['2002-10-17':'2002-11-29'] = 0
-
-# save market_light to csv
 
 ## Apply Median Filtering to smooth out the market light and reduce noise
 
