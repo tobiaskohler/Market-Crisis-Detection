@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class CSVHandler():
     
     def __init__(self) -> None:
@@ -137,14 +136,15 @@ class CSVHandler():
         df['diff_BCI'] = df['BCI'].pct_change()
         df['diff_UNRATE'] = df['UNRATE'].pct_change()
         
-        # DATE-RELATED FEATURES
+        # DATE-RELATED FEATURES,
         df['day_of_week'] = df.index.dayofweek
         df['month'] = df.index.month
-        df['is_month_end'] = df.index.is_month_end
-        df['is_month_start'] = df.index.is_month_start
-        df['is_quarter_end'] = df.index.is_quarter_end
-        df['is_quarter_start'] = df.index.is_quarter_start
         
+        # instead of BOOLEANS, we use 1 and 0
+        df['is_month_end'] =    df.index.is_month_end.astype(int)
+        df['is_month_start'] =  df.index.is_month_start.astype(int)
+        df['is_quarter_end'] =  df.index.is_quarter_end.astype(int)
+        df['is_quarter_start'] =df.index.is_quarter_start.astype(int)
         
         # LAGGED VARIABLES
         for i in range(1,lags+1):

@@ -10,6 +10,8 @@ import numpy as np
 from utils import *
 import time
 
+from hmm import calc_hmm
+
 #make background grey
 sns.set_style('darkgrid')
 
@@ -102,6 +104,8 @@ predictions.index = data_test.index
 original_with_predictions = pd.concat([features, predictions], axis=1)
 plt.style.use='dark-background'
 
+hmm_df = calc_hmm()
+original_with_predictions['market_light_hmm'] = hmm_df
 
 
 fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, sharex=True)
@@ -248,14 +252,34 @@ for i in range(1, len(original_with_predictions)):
         original_with_predictions['log_ret_drawdown_adaptive'][i] = 0.0
                     
 
+#CHECK IF RANDOM FOREST IS SUPERIOR TO HIDDEN MARKOV MODEL
+original_with_predictions['log_ret_hmm'] = 0.0
 
+for i in range(1, len(original_with_predictions)):
+    
+    if not pd.isna(original_with_predictions['difference'][i]):
+
+        if original_with_predictions['market_light_hmm'][i-2] == 1: # drawdown of 2 days ago
+            original_with_predictions['log_ret_hmm'][i] = 1 * original_with_predictions['log_ret'][i]
+            
+        elif original_with_predictions['market_light_hmm'][i-2] == 0: # drawdown of 2 days ago
+            original_with_predictions['log_ret_hmm'][i] = 0.6 * original_with_predictions['log_ret'][i]
+ 
+        else:
+            original_with_predictions['log_ret_hmm'][i] = 0
+            
+    else:
+        original_with_predictions['log_ret_hmm'][i] = 0.0
+        
     
 ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
 ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
 ax4.plot(original_with_predictions['log_ret_sma'].cumsum(), color='green')
 ax4.plot(original_with_predictions['log_ret_drawdown_adaptive'].cumsum(), color='purple')
+ax4.plot(original_with_predictions['log_ret_hmm'].cumsum(), color='cyan')
 
-ax4.legend(['BAH', 'RF adaptive strategy', 'SMA(30/200 long only)', 'DD adaptive strategy'], loc='upper left')
+
+ax4.legend(['BAH', 'RF adaptive strategy', 'SMA(30/200 long only)', 'DD adaptive strategy', 'HMM'], loc='upper left')
 ax4.set_ylabel('Cumulative return')
 ax4.set_title('PERFORMANCE')
 
@@ -264,17 +288,20 @@ ax4.set_title('PERFORMANCE')
 #calculate annualized sharpe ratio
 sharpe_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'].std())
 sharpe_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'].std())
+sharpe_ratio_hmm = np.sqrt(252) * (original_with_predictions['log_ret_hmm'].mean() / original_with_predictions['log_ret_hmm'].std())
+
 
 # add sharpe ratio to plot
 ax4.text(0.5, 0.5, f'Sharpe ratio BAH: {sharpe_ratio_bah:.6f}', transform=ax4.transAxes)
 ax4.text(0.5, 0.4, f'Sharpe ratio adaptive: {sharpe_ratio_adaptive:.6f}', transform=ax4.transAxes)
-
+ax4.text(0.5, 0.3, f'Sharpe ratio HMM: {sharpe_ratio_hmm:.6f}', transform=ax4.transAxes)
 
 
 
 # calculate drawdown of BAH vs. adaptive strategy
 original_with_predictions['cum_ret_bah'] = original_with_predictions['log_ret_bah'].cumsum()
 original_with_predictions['cum_ret_adaptive'] = original_with_predictions['log_ret_adaptive'].cumsum()
+original_with_predictions['cum_ret_hmm'] = original_with_predictions['log_ret_hmm'].cumsum()
 
 original_with_predictions['cum_max_bah'] = original_with_predictions['cum_ret_bah'].cummax()
 original_with_predictions['drawdown_bah'] = original_with_predictions['cum_max_bah'] - original_with_predictions['cum_ret_bah']
@@ -282,20 +309,27 @@ original_with_predictions['drawdown_bah'] = original_with_predictions['cum_max_b
 original_with_predictions['cum_max_adaptive'] = original_with_predictions['cum_ret_adaptive'].cummax()
 original_with_predictions['drawdown_adaptive'] = original_with_predictions['cum_max_adaptive'] - original_with_predictions['cum_ret_adaptive']
 
+original_with_predictions['cum_max_hmm'] = original_with_predictions['cum_ret_hmm'].cummax()
+original_with_predictions['drawdown_hmm'] = original_with_predictions['cum_max_hmm'] - original_with_predictions['cum_ret_hmm']
+
+
 ax5.plot(original_with_predictions['drawdown_bah'], color='blue')
 ax5.plot(original_with_predictions['drawdown_adaptive'], color='red')
-ax5.legend(['BAH', 'Adaptive strategy'], loc='upper left')
+ax5.plot(original_with_predictions['drawdown_hmm'], color='cyan')
+ax5.legend(['BAH', 'Adaptive strategy', 'HMM Gausian'], loc='upper left')
 ax5.set_ylabel('Drawdown')
 ax5.set_title('DRAWDOWN')
 
 #calculate sortino ratio
 sortino_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'][original_with_predictions['log_ret_bah'] < 0].std())
 sortino_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'][original_with_predictions['log_ret_adaptive'] < 0].std())
+sortino_ratio_hmm = np.sqrt(252) * (original_with_predictions['log_ret_hmm'].mean() / original_with_predictions['log_ret_hmm'][original_with_predictions['log_ret_hmm'] < 0].std())
+
 
 # add sortino ratio to plot
 ax5.text(0.5, 0.5, f'Sortino ratio BAH: {sortino_ratio_bah:.6f}', transform=ax5.transAxes)
 ax5.text(0.5, 0.4, f'Sortino ratio adaptive: {sortino_ratio_adaptive:.6f}', transform=ax5.transAxes)
-
+ax5.text(0.5, 0.3, f'Sortino ratio HMM: {sortino_ratio_hmm:.6f}', transform=ax5.transAxes)
 
 
 fig.set_size_inches(17.5, 9.5)
