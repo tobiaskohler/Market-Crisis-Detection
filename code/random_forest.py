@@ -333,9 +333,10 @@ ax5.text(0.5, 0.3, f'Sortino ratio HMM: {sortino_ratio_hmm:.6f}', transform=ax5.
 
 
 fig.set_size_inches(17.5, 9.5)
-plt.show()
+
 
 
 #save original with predictions to csv
 original_with_predictions.to_csv('../predictions/original_with_predictions.csv')
 plt.savefig(f'../predictions/BAH_vs_adaptive{time.time()}.png')
+#plt.show()
