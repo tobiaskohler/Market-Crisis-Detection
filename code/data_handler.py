@@ -113,7 +113,13 @@ class CSVHandler():
         print(df.shape)
         print(df.index)
         print(df.columns)
-                
+        
+        # calculate rolling drawdown, period n days
+        # initialize rolling_max with value of first observation
+        df['cum_returns'] = df['log_ret'].cumsum()
+        df['rolling_max'] = df['cum_returns'].rolling(window=200, min_periods=1).max()
+        df['drawdown'] = df['cum_returns']/df['rolling_max'] - 1.0        
+            
         # AUGMENT DATA WITH NEW FEATURES
         lags = 14
         

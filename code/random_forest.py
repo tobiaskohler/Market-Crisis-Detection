@@ -214,12 +214,48 @@ for i in range(len(original_with_predictions)):
         
     else:
         original_with_predictions['log_ret_sma'][i] = 0.0
+        
+#### CHECK, IF RANDOM FOREST IS SUPERIOR TO SIMLE DRAWDOWN ADAPTIVE STRATEGY
+original_with_predictions['market_light_by_drawdown'] = 0
+
+for i in range(len(original_with_predictions)):
+    if not pd.isna(original_with_predictions['difference'][i]):
+        if original_with_predictions['drawdown'][i] <= -0.05:
+            original_with_predictions['market_light_by_drawdown'][i] = -1
+        elif original_with_predictions['drawdown'][i] > -0.05 and original_with_predictions['drawdown'][i] <= -0.01:
+            original_with_predictions['market_light_by_drawdown'][i] = 0
+        else:
+            original_with_predictions['market_light_by_drawdown'][i] = 1
+    else:
+        original_with_predictions['market_light_by_drawdown'][i] = 0
+
+original_with_predictions['log_ret_drawdown_adaptive'] = 0.0
+
+for i in range(1, len(original_with_predictions)):
+    
+    if not pd.isna(original_with_predictions['difference'][i]):
+
+        if original_with_predictions['market_light_by_drawdown'][i-2] == 1: # drawdown of 2 days ago
+            original_with_predictions['log_ret_drawdown_adaptive'][i] = 1 * original_with_predictions['log_ret'][i]
+            
+        elif original_with_predictions['market_light_by_drawdown'][i-2] == 0: # drawdown of 2 days ago
+            original_with_predictions['log_ret_drawdown_adaptive'][i] = 0.6 * original_with_predictions['log_ret'][i]
+ 
+        else:
+            original_with_predictions['log_ret_drawdown_adaptive'][i] = 0
+            
+    else:
+        original_with_predictions['log_ret_drawdown_adaptive'][i] = 0.0
+                    
+
+
     
 ax4.plot(original_with_predictions['log_ret_bah'].cumsum(), color='blue')
 ax4.plot(original_with_predictions['log_ret_adaptive'].cumsum(), color='red')
 ax4.plot(original_with_predictions['log_ret_sma'].cumsum(), color='green')
+ax4.plot(original_with_predictions['log_ret_drawdown_adaptive'].cumsum(), color='purple')
 
-ax4.legend(['BAH', 'Adaptive strategy', 'SMA(30/200 long only)'], loc='upper left')
+ax4.legend(['BAH', 'RF adaptive strategy', 'SMA(30/200 long only)', 'DD adaptive strategy'], loc='upper left')
 ax4.set_ylabel('Cumulative return')
 ax4.set_title('PERFORMANCE')
 
