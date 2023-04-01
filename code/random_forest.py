@@ -30,7 +30,6 @@ labels_train = labels[:training_period]
 labels_test = labels[training_period:]
 
 
-# csv each set to csv
 data_train.to_csv('../prepared_data/data_train.csv')
 data_test.to_csv('../prepared_data/data_test.csv')
 labels_train.to_csv('../prepared_data/labels_train.csv')
@@ -38,7 +37,7 @@ labels_test.to_csv('../prepared_data/labels_test.csv')
 
 print(f'Shape of training data: {data_train.shape}\nShape of testing data: {data_test.shape}\nShape of training labels: {labels_train.shape}\nShape of testing labels: {labels_test.shape}')
 
-# Creating a random forest classifier
+
 clf = RandomForestClassifier(n_estimators=100, n_jobs=-1) #using all cores
 clf.fit(data_train, labels_train)
 
@@ -165,9 +164,9 @@ ax2.axvline(x=data_train.index[-1], color='black', linestyle='--')
 
 
 
-# Calculate Performance of BAH vs Predictions
-original_with_predictions['log_ret_adaptive'] = 0.0  # create a new column with initial values of 0.0
-original_with_predictions['log_ret_bah'] = 0.0  # create a new column with initial values of 0.0
+
+original_with_predictions['log_ret_adaptive'] = 0.0  
+original_with_predictions['log_ret_bah'] = 0.0  
 
 for i in range(len(original_with_predictions)):
     
@@ -202,7 +201,7 @@ for i in range(len(original_with_predictions)):
 
 
 
-#Compare to simple moving average strategy, if 30 day is below 200 day, no position, else long
+
 original_with_predictions['sma_30_200'] = 0.0
 original_with_predictions['log_ret_sma'] = 0.0
 
@@ -285,20 +284,16 @@ ax4.set_title('PERFORMANCE')
 
 
 
-#calculate annualized sharpe ratio
 sharpe_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'].std())
 sharpe_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'].std())
 sharpe_ratio_hmm = np.sqrt(252) * (original_with_predictions['log_ret_hmm'].mean() / original_with_predictions['log_ret_hmm'].std())
 
 
-# add sharpe ratio to plot
 ax4.text(0.5, 0.5, f'Sharpe ratio BAH: {sharpe_ratio_bah:.6f}', transform=ax4.transAxes)
 ax4.text(0.5, 0.4, f'Sharpe ratio adaptive: {sharpe_ratio_adaptive:.6f}', transform=ax4.transAxes)
 ax4.text(0.5, 0.3, f'Sharpe ratio HMM: {sharpe_ratio_hmm:.6f}', transform=ax4.transAxes)
 
 
-
-# calculate drawdown of BAH vs. adaptive strategy
 original_with_predictions['cum_ret_bah'] = original_with_predictions['log_ret_bah'].cumsum()
 original_with_predictions['cum_ret_adaptive'] = original_with_predictions['log_ret_adaptive'].cumsum()
 original_with_predictions['cum_ret_hmm'] = original_with_predictions['log_ret_hmm'].cumsum()
@@ -320,13 +315,11 @@ ax5.legend(['BAH', 'Adaptive strategy', 'HMM Gausian'], loc='upper left')
 ax5.set_ylabel('Drawdown')
 ax5.set_title('DRAWDOWN')
 
-#calculate sortino ratio
 sortino_ratio_bah = np.sqrt(252) * (original_with_predictions['log_ret_bah'].mean() / original_with_predictions['log_ret_bah'][original_with_predictions['log_ret_bah'] < 0].std())
 sortino_ratio_adaptive = np.sqrt(252) * (original_with_predictions['log_ret_adaptive'].mean() / original_with_predictions['log_ret_adaptive'][original_with_predictions['log_ret_adaptive'] < 0].std())
 sortino_ratio_hmm = np.sqrt(252) * (original_with_predictions['log_ret_hmm'].mean() / original_with_predictions['log_ret_hmm'][original_with_predictions['log_ret_hmm'] < 0].std())
 
 
-# add sortino ratio to plot
 ax5.text(0.5, 0.5, f'Sortino ratio BAH: {sortino_ratio_bah:.6f}', transform=ax5.transAxes)
 ax5.text(0.5, 0.4, f'Sortino ratio adaptive: {sortino_ratio_adaptive:.6f}', transform=ax5.transAxes)
 ax5.text(0.5, 0.3, f'Sortino ratio HMM: {sortino_ratio_hmm:.6f}', transform=ax5.transAxes)
@@ -336,7 +329,6 @@ fig.set_size_inches(17.5, 9.5)
 
 
 
-#save original with predictions to csv
 original_with_predictions.to_csv('../predictions/original_with_predictions.csv')
 plt.savefig(f'../predictions/BAH_vs_adaptive{time.time()}.png')
 #plt.show()

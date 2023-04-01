@@ -13,7 +13,6 @@ from scipy.signal import medfilt
 def calc_hmm():
 
 
-    #make background grey
     sns.set_style('darkgrid')
 
     features, labels = CSVHandler.csv_to_np(CSVHandler, filepath='../prepared_data/resampled.csv')
@@ -37,11 +36,11 @@ def calc_hmm():
     X['regimes'] = medfilt(X['regimes'], kernel_size=131)
     X['regimes'] = X['regimes'].shift(-2)
 
-    # calculate mean and std-dev for each regime annuazlized
+
     means = X.groupby('regimes')['log_ret'].mean() * 252
     means.sort_values(inplace=True)
     stds = X.groupby('regimes')['log_ret'].std() * 252
-    #sort stds in descending order
+
     stds.sort_values(inplace=True, ascending=False)
     srs = means / stds
     srs.sort_values(inplace=True)
@@ -62,7 +61,7 @@ def calc_hmm():
 
 
     print(X)
-    #transform X to dataframe
+
     X = pd.DataFrame(X)
     X.to_csv('../prepared_data/resampled_hmm.csv')
         

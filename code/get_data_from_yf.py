@@ -4,18 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-# add moving_average parameter, default to False
 
 def get_data(start: str, end: str, ticker: str, indicators: bool=False, plot: bool=False) -> pd.DataFrame:
 
 
     data = yf.download(ticker, start=start, end=end, interval='1d')
     data = data[['Adj Close']]
-    #calculate daily log returns
+
     data.columns = [ticker]
     data['log_ret'] = np.log(data[ticker] / data[ticker].shift(1))
     
-    # remove timezone info from index
+
     data.index = data.index.tz_localize(None)
     
     if indicators:
@@ -46,13 +45,11 @@ def get_data(start: str, end: str, ticker: str, indicators: bool=False, plot: bo
         
         data = data.dropna()
     
-    #save data to csv using ; as separator
+
     data.to_csv(f'{ticker}_{start}_{end}.csv', sep=';')
     
     if plot:
         
-        
-        # plot all data, except for columns beginning with "mom" on first plot, and columns beginning with "mom" on second plot
         plt.style.use('dark_background')        
 
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(15, 10))
@@ -76,7 +73,7 @@ def get_data(start: str, end: str, ticker: str, indicators: bool=False, plot: bo
         ax2.legend(loc='upper left')
         ax2.set_title(f'{ticker} Momentum Indicators ({start} to {end})')
         
-        # add vola
+
         ax3.plot(data['vola200'], label='vola200')
         ax3.plot(data['vola50'], label='vola50')
         ax3.plot(data['vola20'], label='vola20')

@@ -17,9 +17,7 @@ class CSVHandler():
         
     
     def _get_files(self, filepath: str) -> list:
-        
-        #only select files with .csv extension
-        
+                
         filenames = [f for f in os.listdir(filepath) if f.endswith('.csv')]
         no_files = len(filenames)
         
@@ -44,7 +42,6 @@ class CSVHandler():
             df = pd.read_csv(filename, delimiter=';')
             
             if filename==self.filepath_monthly:
-                # adjust index to only contain year and month
                 df.set_index('Date', inplace=True)
                 df.index = pd.to_datetime(df.index)
                 df.index = df.index.to_period('M')
@@ -55,7 +52,6 @@ class CSVHandler():
             
             print(df)
             
-            #make all columns numeric
             df = df.apply(pd.to_numeric, errors='coerce')
             
             print(df.head(2))
@@ -113,8 +109,6 @@ class CSVHandler():
         print(df.index)
         print(df.columns)
         
-        # calculate rolling drawdown, period n days
-        # initialize rolling_max with value of first observation
         df['cum_returns'] = df['log_ret'].cumsum()
         df['rolling_max'] = df['cum_returns'].rolling(window=200, min_periods=1).max()
         df['drawdown'] = df['cum_returns']/df['rolling_max'] - 1.0        
@@ -234,10 +228,7 @@ class CSVHandler():
         
         print(f'Shape of features: {features.shape}')
         print(f'Shape of labels: {labels.shape}')
-        
-        # # save features and labels to csv files
-        # features.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'features.csv'))
-        # labels.to_csv(os.path.join(self.parent_dir, 'prepared_data', 'labels.csv'))
+
         
         return features, labels
     
